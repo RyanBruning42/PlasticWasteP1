@@ -5,12 +5,13 @@ editor: visual
 ---
 
 ```{r}
+library(tidyverse)
 plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-01-26/plastics.csv')
 ```
 
 ## Context
 
-This data set was independently gathered by an individual in order to contribute to the global audit that the Break Free from Plastic organization holds each year. They collected data on their own town of St. John in Newfoundland. The dataset has information on the amount of different plastic waste (polyester, pvc, polyethylene, etc.) as well as the grand total of all plastic types, number of counting events, and number of volunteers at each cleanup.
+This data set was independently gathered by an individual in order to contribute to the global audit that the Break Free from Plastic organization holds each year. They collected data in their own town of St. John in Newfoundland. The dataset has information on the amount of different plastic waste (polyester, PVC, polyethylene, etc...) as well as the grand total of all plastic types, number of counting events, and number of volunteers at each cleanup.
 
 ## Data Cleaning:
 
@@ -18,9 +19,9 @@ From the included code on the data set, we can see that they have already taken 
 
 ## Research Questions w/ Data:
 
--   Does the mean average of plastic waste per count event differ between each plastic type
+-   Does the mean average of plastic waste per count event differ between each plastic type?
 
--   Does the overall plastic waste differ between 2019 and 2020
+-   Does the overall plastic waste differ between 2019 and 2020?
 
 -   What is the relationship between the amount of volunteers and the
 
@@ -61,5 +62,31 @@ volunteer_props <- function(data) {
     ungroup()
 }
 
-volunteer_sumprops(plastics)
+volunteer_props(plastics)
+```
+
+##Iterations
+
+```{r}
+#Total waste per plastic type
+plastic_types <- c("hdpe", "ldpe", "o", "pet", "pp", "ps", "pvc")
+
+plastic_summary <- data.frame()
+
+for (type in plastic_types) {
+  
+  placehold <- plastics |>
+    summarise(
+      plastic_type = type,
+      total_waste = sum(.data[[type]], na.rm = TRUE)
+    )
+  
+  plastic_summary <- bind_rows(plastic_summary, placehold)
+}
+
+plastic_summary
+```
+
+```{r}
+
 ```
