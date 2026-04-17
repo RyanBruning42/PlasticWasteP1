@@ -31,8 +31,6 @@ From the included code on the data set, we can see that they have already taken 
 
 -   Does the overall plastic waste differ between 2019 and 2020?
 
--   What is the relationship between the amount of volunteers and the
-
 ## Research Questions w/ Supplemental Data:
 
 -   Does the average plastic waste in St. John differ from other cities?
@@ -43,64 +41,88 @@ From the included code on the data set, we can see that they have already taken 
 
 -   <https://excalidraw.com/#json=VqbcZ1Dds7wym3M6Ux9X5,LvRZ1Q5smV5xQozI1HNt0w>
 
+## Check In 2:
+
+## Data Summary 1:
+
+How much waste is collected per volunteer change over time?
+
 ```{r}
-## Does the parent company send different amount of volunteers to different countries?
+waste_per_volunteer <- plastics |>
+  mutate(
+    waste_per_volunteer = grand_total / volunteers
+  ) |>
+  group_by(year) |>
+  summarise(
+    avg_waste_per_volunteer = mean(waste_per_volunteer, na.rm = TRUE),
+    .groups = "drop"
+  )
 
-country_volunteers <- function(company_name) {
-  plastics  |>
-    filter(parent_company == company_name) |>
-    group_by(country) |>
-    summarise(
-      total_volunteers = sum(volunteers, na.rm = TRUE),
-      .groups = "drop"
-    ) |>
-    arrange(desc(total_volunteers))
-}
-
-country_volunteers("The Coca-Cola Company")
-country_volunteers("Doble Cola")
+waste_per_volunteer
 ```
 
+## Data Summary 2:
+
+How much waste is collected per cleanup event over time?
+
 ```{r}
-## Creating proportions of volunteers 
-volunteer_props <- function(data) {
+waste_per_event_summary <- function(data) {
   data |>
-    group_by(parent_company) |>
-    mutate(prop_volunteers = volunteers / sum(volunteers, na.rm = TRUE)) |>
-    ungroup()
-}
-
-volunteer_props(plastics)
-```
-
-##Iterations
-
-```{r}
-#Total waste per plastic type
-plastic_types <- c("hdpe", "ldpe", "o", "pet", "pp", "ps", "pvc")
-
-plastic_summary <- data.frame()
-
-for (type in plastic_types) {
-  
-  placehold <- plastics |>
+    mutate(
+      waste_per_event = grand_total / num_events
+    ) |>
+    group_by(year) |>
     summarise(
-      plastic_type = type,
-      total_waste = sum(.data[[type]], na.rm = TRUE)
+      avg_waste_per_event = mean(waste_per_event, na.rm = TRUE),
+      .groups = "drop"
     )
-  
-  plastic_summary <- bind_rows(plastic_summary, placehold)
 }
 
-plastic_summary
+waste_per_event_summary(plastics)
 ```
 
-```{r}
-volunteer_summary <- plastics %>% 
-  map(.f = country_volunteers) %>% 
-  bind_rows(.id = "id")
+## Data Summary 3:
 
-volunteer_summary
+Which parent companies contributed the most volunteers across both years?
+
+```{r}
+total_company_volunteers <- function(company) {
+  plastics |>
+    filter(parent_company == company) |>
+    summarise(total_volunteers = sum(volunteers, na.rm = TRUE)) |>
+    pull(total_volunteers)
+}
+
+plastics |>
+  distinct(parent_company) |>
+  mutate(
+    total_volunteers = map_dbl(parent_company, total_company_volunteers)
+  ) |>
+  slice_max(total_volunteers, n = 10)
+```
+
+## Data Summary 4:
+
+Which parent companies are responsible for the most total plastic waste?
+
+```{r}
+top_companies <- plastics |>
+  group_by(parent_company) |>
+  summarise(
+    total_waste = sum(grand_total, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  slice_max(total_waste, n = 10) |>
+  pull(parent_company)
+
+map_dfr(top_companies, ~ {
+  plastics |>
+    filter(parent_company == .x) |>
+    summarise(
+      total_waste = sum(grand_total, na.rm = TRUE)
+    ) |>
+    mutate(parent_company = .x)
+})
 ```
 
 ## Check-In 3:
