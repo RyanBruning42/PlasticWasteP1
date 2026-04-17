@@ -6,6 +6,14 @@ editor: visual
 
 ```{r}
 library(tidyverse)
+library(httr)
+library(jsonlite)
+library(tidyjson)
+library(glue)
+library(countrycode)
+```
+
+```{r}
 plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-01-26/plastics.csv')
 ```
 
@@ -93,4 +101,80 @@ volunteer_summary <- plastics %>%
   bind_rows(.id = "id")
 
 volunteer_summary
+```
+
+## Check-In 3:
+
+```{r}
+#renaming countries in my dataset to have ISO-2 codes that our API uses
+plastics <- plastics %>% 
+  filter(country != "EMPTY") %>% 
+  mutate(iso2 = countrycode(country, 
+                            origin = "country.name", 
+                            destination = "iso2c"))
+```
+
+```{r}
+#| eval: false
+#testing API for one country gdp
+
+us_url <- "https://api.worldbank.org/v2/country/US/indicator/NY.GDP.MKTP.CD?format=json"
+
+us_data <- fromJSON(us_url)
+
+us_gdp <- us_data[[2]]
+```
+
+```{r}
+#| label: GDP Function
+get_gdp <- function(iso2) {
+  
+  url <- glue("https://api.worldbank.org/v2/country/{iso2}/indicator/NY.GDP.MKTP.CD?format=json")
+  
+  my_data <- fromJSON(url)
+  
+  if(is.null(my_data[[2]])){
+    return(NULL)
+  } else{
+    return(my_data[[2]] %>% 
+             filter(date %in% c("2019","2020")) %>% 
+             select(date, value) %>% 
+             mutate(iso2c = iso2,
+                    value = value/1e9) %>% 
+             rename(gdp_billions = value))
+  }
+}
+
+get_gdp("AU")
+```
+
+```{r}
+#| eval: false
+#Testing API for one country population
+
+us_url <- "https://api.worldbank.org/v2/country/US/indicator/SP.POP.TOTL?format=json"
+
+us_data <- fromJSON(us_url)
+
+us_pop <- us_data[[2]]
+```
+
+```{r}
+get_population <- function(iso2) {
+  
+  url <- glue("https://api.worldbank.org/v2/country/{iso2}/indicator/SP.POP.TOTL?format=json")
+  
+  my_data <- fromJSON(url)
+  
+  if(is.null(my_data[[2]])) {
+    return(NULL)
+  } else {
+    return(my_data[[2]] %>% 
+             filter(date %in% c("2019","2020")) %>%
+             select(date, value) %>% 
+             mutate(iso2c = iso2))
+  }
+}
+
+get_population("AU")
 ```
