@@ -249,7 +249,7 @@ graph1 <- meta_set %>%
 
 graph1 <- graph1 %>%
   mutate(
-    gdp_per_capita = gdp / population,
+    gdp_per_capita = gdp_billions / population,
     plastic_waste_per_capita = grand_total / population
   )
 
@@ -307,3 +307,5 @@ summary_table<- tibble(
 
 summary_table
 ```
+
+We removed Taiwan from the analysis since there was no api data for Taiwan, therefore we removed Taiwan from the gdp and co2 emissions.
