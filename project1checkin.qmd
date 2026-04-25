@@ -210,9 +210,8 @@ get_population("AU")
 population_data <- map_dfr(iso2_list, get_population)
 ```
 
-
-
 #External CO2 data
+
 ```{r}
 co2 <- readr::read_csv(
   "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv")
