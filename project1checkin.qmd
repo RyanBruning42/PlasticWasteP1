@@ -11,6 +11,7 @@ library(jsonlite)
 library(tidyjson)
 library(glue)
 library(countrycode)
+library(gt)
 ```
 
 ```{r}
@@ -217,9 +218,9 @@ co2 <- readr::read_csv(
   "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv")
 ```
 
-#For our first supplemental dataset, we cited the World Bank API to gather data on both GDP and population. We figured this data would be necessary if we wanted to find out how plastic waste relates to the size of a countries population and/or economy.
+For our first supplemental dataset, we cited the World Bank API to gather data on both GDP and population. We figured this data would be necessary if we wanted to find out how plastic waste relates to the size of a countries population and/or economy.
 
-#For the second dataset we found it from a website called "Our World in Data" and it contains a lot of information on different types of emissions, but in order to keep it less messy we decided to focus exclusively on the CO2 emissions and wanted to see if there was a relationship between the two.
+For the second dataset we found it from a website called "Our World in Data" and it contains a lot of information on different types of emissions, but in order to keep it less messy we decided to focus exclusively on the CO2 emissions and wanted to see if there was a relationship between the two.
 
 ```{r}
 #| label: Meta Data Creation
@@ -248,9 +249,10 @@ graph1 <- meta_set %>%
 
 graph1 <- graph1 %>%
   mutate(
-    gdp_per_capita = gdp_billions / population,
+    gdp_per_capita = gdp_billions * 1,000,000,000 / population,
     plastic_waste_per_capita = grand_total / population
-  )
+  ) |>
+  filter(plastic_waste_per_capita < .002)
 
 ggplot(graph1, aes(x = gdp_per_capita, y = plastic_waste_per_capita)) +
   geom_point() +
@@ -307,4 +309,58 @@ summary_table<- tibble(
 summary_table
 ```
 
+<<<<<<< HEAD
 We removed Taiwan from the analysis since there was no api data for Taiwan, therefore we removed Taiwan from the gdp and co2 emissions.
+=======
+We removed Taiwan from the analysis since there was no api data for Taiwan, therefore we removed Taiwan from the gdp and CO2 emissions.
+
+## Check-in 4:
+
+```{r}
+#| label: Statistical Model
+
+model_data <- meta_set %>%
+  filter(year == 2019, parent_company == "Grand Total") %>%
+  mutate(
+    gdp_per_capita = gdp_billions * 1e9 / population,
+    plastic_waste_per_capita = grand_total / population
+  )
+
+model <- lm(plastic_waste_per_capita ~ gdp_per_capita, data = model_data)
+
+model_table <- summary(model)$coefficients %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("term") %>%
+  mutate(
+    term = recode(term,
+      `(Intercept)` = "Intercept",
+      gdp_per_capita = "GDP Per Capita"
+    )
+  )
+
+model_table %>%
+  gt() %>%
+  cols_label(
+    term = "Variable",
+    Estimate = "Estimate",
+    `Std. Error` = "Std. Error",
+    `t value` = "t-value",
+    `Pr(>|t|)` = "p-value"
+  ) %>%
+  fmt_number(
+    columns = c(Estimate, `Std. Error`, `t value`, `Pr(>|t|)`),
+    decimals = 4
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_header(
+    title = md("**Regression Results: GDP vs Plastic Waste**"),
+    subtitle = md("Linear Model for 2019 Per Capita Data")
+  ) %>%
+  tab_caption(
+    md("Table 1: Linear regression examining the relationship between GDP per capita and plastic waste per capita in 2019.")
+  )
+```
+>>>>>>> 8066d13cdc441f02776d618531fe665c5ae808c7
