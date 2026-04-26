@@ -14,7 +14,6 @@ library(countrycode)
 library(gt)
 library(hrbrthemes)
 library(viridis)
-library(hexbin)
 ```
 
 ```{r}
@@ -31,19 +30,19 @@ From the included code on the data set, we can see that they have already taken 
 
 ## Research Questions w/ Data:
 
-- Does the mean average of plastic waste per count event differ between each plastic type?
+-   Does the mean average of plastic waste per count event differ between each plastic type?
 
-- Does the overall plastic waste differ between 2019 and 2020?
+-   Does the overall plastic waste differ between 2019 and 2020?
 
 ## Research Questions w/ Supplemental Data:
 
-- Do richer countries generate more plastic waste per person?
+-   Do richer countries generate more plastic waste per person?
 
-- Did the COVID-19 lockdown in 2020 affect plastic waste pollution in the same way it affected CO2 emissions?
+-   Did the COVID-19 lockdown in 2020 affect plastic waste pollution in the same way it affected CO2 emissions?
 
 ## Potential Visualizations:
 
-- <https://excalidraw.com/#json=VqbcZ1Dds7wym3M6Ux9X5,LvRZ1Q5smV5xQozI1HNt0w>
+-   <https://excalidraw.com/#json=VqbcZ1Dds7wym3M6Ux9X5,LvRZ1Q5smV5xQozI1HNt0w>
 
 ## Check In 2:
 
@@ -364,8 +363,7 @@ model_table %>%
     md("Table 1: Linear regression examining the relationship between GDP per capita and plastic waste per capita in 2019.")
   )
 ```
-
-The regression shows a positive relationship between GDP per capita and plastic waste per capita. This is suggested by the positive coefficient and implies that increases in GDP means an increase in plastic waste per capita, although the strength of the relationship is shown to be rather weak.
+The regression shows a positive relationship between GDP per capita and plastic waste per capita. This is suggested by the positive coefficient and implies that increases in GDP means an increase in plastic waste per capita, although the strength of the relationship is shown to be rather weak. 
 
 ```{r}
 #| warning: FALSE
@@ -417,4 +415,4 @@ model_data %>%
     theme_ft_rc()
 ```
 
-The visualizations show the relationship between GDP and CO2 emissions, the regression model shows explicitly how GDP per capita can predict plastic waste per capita, giving us a way to quantify the relationship between the two groups.
+The visualizations show the relationship between GDP and CO2 emmissions, the regression model shows explicitly how GDP per capita can predict plastic waste per capita, giving us a way to quantify the relationship between the two groups.
