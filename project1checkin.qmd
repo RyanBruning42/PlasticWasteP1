@@ -2,9 +2,12 @@
 title: "Project1 Draft"
 format: html
 editor: visual
+embed-resources: true 
 ---
 
 ```{r}
+#| eval: false
+
 library(tidyverse)
 library(httr)
 library(jsonlite)
@@ -21,31 +24,25 @@ library(hexbin)
 plastics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2021/2021-01-26/plastics.csv')
 ```
 
-## Context
+# Data Context:
 
-This data set was independently gathered by an individual in order to contribute to the global audit that the Break Free from Plastic organization holds each year. They collected data in their own town of St. John in Newfoundland. The dataset has information on the amount of different plastic waste (polyester, PVC, polyethylene, etc...) as well as the grand total of all plastic types, number of counting events, and number of volunteers at each cleanup.
+## Plastic Waste Data:
 
-## Data Cleaning:
+This data set was independently gathered by an individual names Sarah Sauve, in order to contribute to the global audit that the Break Free from Plastic organization holds each year. They collected data in their own town of St. John in Newfoundland from the year 2019 to 2020. The data set has information on the amount of different plastic waste (polyester, PVC, polyethylene, etc...) as well as the grand total of all plastic types, number of counting events, and number of volunteers at each cleanup. It is not specified how the data was collected.
 
-From the included code on the data set, we can see that they have already taken measures to clean the data. It appears that most of the cleaning is making sure that each variable is the correct type as well as renaming columns and fixing all the numeric values.
+## Population and GDP by Country Data:
 
-## Research Questions w/ Data:
+Through the use of the World Bank Group's API, we were able to collect population and GDP data for each country in our original Plastic Waste data set between the years 2019 and 2020. The World Bank Group does not necessarily collect the data themselves, but relies on outside resources like countries National Statistic Agencies, Central Banks, and Government Agencies. Although the World Bank does not collect the data themselves, they coordinate and compile the data into easily accessible APIs to be used. The data is collected through multiple sources like household surveys, digital records, censuses, and secondary sources previously discussed. This data is collected in order to have a record of important statistics on countries that is easily accessible and can be analyzed at any given moment.
 
-- Does the mean average of plastic waste per count event differ between each plastic type?
+## CO2 Data:
 
-- Does the overall plastic waste differ between 2019 and 2020?
+Our final data set contains information about CO2 Emissions throughout history that was published by *Our World in Data*. Although *Our World in Data* published the data, they rely on outside sources such as the Global Carbon Project and other scientific databases to collect the data. The data set contains country-level CO2 emissions spanning as early as 1750 to 2024. However, to match our original data set, we restricted the years to 2019 and 2020. In order to actually come up with the data, the original collectors had to get creative. To estimate the CO2 emission for one country in any given year they would gather information on how much energy sources a country extracted in that year, then add the amount of fuel that country imported, and finally subtract any fuel the country exported. What was left is an estimate of the net consumption of energy sources in that year. They can then break down the energy sources into smaller categories and multiply the quantity of one fuel source by the emission factor to figure out how much CO2 was emitted by that energy source. They would then do that for all energy sources and sum them up to find the total amount of CO2 emission by a country in a given year. This may seem like a lot of work, but this is very important data. CO2 emissions are detrimental to the health and safety of Earth and its future. We must be tracking and analyzing how our CO2 emissions change year by year in order to better understand how we can mitigate the effect it will have on our future.
 
-## Research Questions w/ Supplemental Data:
+# Research Questions
 
-- Do richer countries generate more plastic waste per person?
+- What is the relationship between GDP per capita and CO₂ emissions per capita across countries in 2019–2020, and how does population size influence this relationship?
 
-- Did the COVID-19 lockdown in 2020 affect plastic waste pollution in the same way it affected CO2 emissions?
-
-## Potential Visualizations:
-
-- <https://excalidraw.com/#json=VqbcZ1Dds7wym3M6Ux9X5,LvRZ1Q5smV5xQozI1HNt0w>
-
-## Check In 2:
+- What is the relationship between GDP per capita and plastic waste generation across countries in 2019–2020?
 
 ## Data Summary 1:
 
