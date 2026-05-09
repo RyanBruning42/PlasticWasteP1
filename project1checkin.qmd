@@ -7,7 +7,7 @@ format:
     code-summary: "Show code"
     toc: true
     number-sections: true
-embed-resources: true
+    embed-resources: true
 editor: visual
 execute:
   warning: false
@@ -161,6 +161,13 @@ population_data <- population_data %>%
   mutate(date = as.numeric(date))
 
 meta_set <- plastics %>%
+  mutate(
+    parent_company = ifelse(
+      parent_company %in% c("NULL", "null"),
+      "Grand Total",
+      parent_company
+    )
+  ) %>%
   left_join(gdp_data, by = c("iso2" = "iso2c", "year" = "date")) %>%
   left_join(population_data, by = c("iso2" = "iso2c", "year" = "date")) %>%
   left_join(co2_sm, by = c("iso2", "year")) %>%
@@ -283,14 +290,12 @@ Now that we understand how plastic waste is distributed between countries and th
 #| label: Comparison of GDP per capita and plastic waste per capita (2019)
 #| warning: false
 #| fig-cap: "Scatterplot of GDP per Capita vs. Plastic Waste Per Capita in the year 2019"
-#| fig-alt: "Scatterplot analyzing the relationship between GDP per Capita and Plastic Waste per Capita in the year 2019. It shows a negative linear relationship between the variables. "
+#| fig-alt: "Scatterplot analyzing the relationship between GDP per Capita and Plastic Waste per Capita in the year 2019. It shows a negative linear relationship between the variables."
 
 graph1 <- meta_set %>%
-  filter(year == 2019, parent_company == "Grand Total")
-
-graph1 <- graph1 %>%
+  filter(year == 2019, parent_company == "Grand Total") %>%
   mutate(
-    gdp_per_capita = gdp_billions * 1,000,000,000 / population,
+    gdp_per_capita = gdp_billions * 1e9 / population,
     plastic_waste_per_capita = grand_total / population
   )
 
@@ -304,7 +309,7 @@ ggplot(graph1, aes(x = gdp_per_capita, y = plastic_waste_per_capita)) +
   ) +
   scale_x_log10() +
   scale_y_log10() +
-    theme_ft_rc() +
+  theme_ft_rc() +
   theme(
     plot.title = element_text(size = 16)
   )
@@ -368,7 +373,7 @@ model_table %>%
   )
 ```
 
-One of the key things to keep in mind with this analysis is the time that the data was collected. Our data is from 2019-2020 with 2020 being the start of the COVID-19 pandemic. Because of that, we thought we should look at the difference in the relationship between GDP per capita and plastic waste betweent those years. Using the bubble plot, we can see that in 2019 there was a steeper negative relationship than there was in 2020. We also generally see smaller values of plastic waste per capita in 2020, which is likely due to less consumption, less generation, and less people leaving their homes.
+One of the key things to keep in mind with this analysis is the time that the data was collected. Our data is from 2019-2020 with 2020 being the start of the COVID-19 pandemic. Because of that, we thought we should look at the difference in the relationship between GDP per capita and plastic waste between those years. Using the bubble plot, we can see that in 2019 there was a steeper negative relationship than there was in 2020. We also generally see smaller values of plastic waste per capita in 2020, which is likely due to less consumption, less generation, and less people leaving their homes.
 
 ```{r}
 #| label: Bubbleplot of GDP per Capita and Plastic Waste by Population Size Facted by Year
@@ -416,19 +421,10 @@ ggplot(
   )
 ```
 
-To truly understanding the impact of the pandemic, we look at the percent change in plastic waste from 2019 to 2020. If plastic waste per capita did decrease between the two years, we would expect to see a negative percent change. From the data, we find a percent change of -61.29%, indicating a singificant decrease in plastic waste per capita over the two year span. This result supports our earlier observation that plastic waste per capita in 2020 was lower than in 2019. Therefore, our analysis suggests that during the pandemic there was a significant reduction in plastic waste per capita.
+To truly understanding the impact of the pandemic, we look at the percent change in plastic waste from 2019 to 2020. If plastic waste per capita did decrease between the two years, we would expect to see a negative percent change. From the data, we find a percent change of -61.29%, indicating a significant decrease in plastic waste per capita over the two year span. This result supports our earlier observation that plastic waste per capita in 2020 was lower than in 2019. Therefore, our analysis suggests that during the pandemic there was a significant reduction in plastic waste per capita.
 
 ```{r}
 #| label: Affect of COVID on Plastic Waste
-
-meta_set <- meta_set %>%
-  mutate(
-    parent_company = ifelse(
-      parent_company %in% c("NULL", "null"),
-      "Grand Total",
-      parent_company
-    )
-  )
 
 plastic_data <- meta_set %>%
   filter(parent_company == "Grand Total") %>%
@@ -478,7 +474,7 @@ summary_table %>%
 With the introduction of GDP and CO~2~ emissions into our data set, we thought it would be interesting to explore the relationship between those variables. We assumed that for countries with higher GDP values, there are going to be more CO~2~ emissions due to the larger consumption and infrastructure. In order to see if this is impacted by population, we created a table comparing the per capita values with the countries population.
 
 ```{r}
-#| label: CDP per Capita vs CO2 Emission per Capita in 2019
+#| label: GDP per Capita vs CO2 Emission per Capita in 2019
 
 country_gdp_co2_summary <- function(data) {
   
@@ -615,10 +611,10 @@ By just using tables, we are losing a lot of information that a visualization ca
 ```{r}
 #| warning: false
 #| label: fig-rq2-bubble
-#| fig-cap: "GDP per capita and CO2 emissions per capita across countries in 2019, with bubble size representing population."
-#| fig-alt: "Bubble plot of GDP per capita versus CO2 emissions per capita for 51 countries in 2019. Bubble size represents population and color indicates GDP level. Countries with higher GDP per capita tend to also have higher CO2 emissions per capita."
+#| fig-cap: "GDP per capita and CO2 emissions per capita across countries in 2019 and 2020, with bubble size representing population."
+#| fig-alt: "Faceted bubble plot of GDP per capita versus CO2 emissions per capita for countries in 2019 and 2020. Bubble size represents population and color indicates GDP level. Countries with higher GDP per capita tend to also have higher CO2 emissions per capita."
 
-model_data %>% 
+model_data %>%
   arrange(desc(population)) %>% 
   mutate(
     country.x = as.factor(country.x),
@@ -641,6 +637,7 @@ model_data %>%
     color = gdp_level
   )) +
   geom_point(alpha = 0.65) +
+  facet_wrap(~year) +
   scale_size(range = c(2, 14), name = "Population") +
   scale_color_viridis_d(option = "A", end = 0.9, name = "GDP Level") +
   scale_x_log10(labels = scales::label_dollar()) +
@@ -650,7 +647,7 @@ model_data %>%
     x = "GDP Per Capita",
     y = "CO2 Emissions Per Capita",
     title = "Bubble Plot of GDP and CO2 Emissions Per Capita",
-    subtitle = "Countries in 2019, with bubble size representing population"
+    subtitle = "Comparison of 2019 and 2020, with bubble size representing population"
   ) +
   theme(
     plot.title = element_text(size = 16),
@@ -658,7 +655,7 @@ model_data %>%
   )
 ```
 
-Again, we were interesting in if the COVID-19 pandemic affected this relationship. In order to see the affect of the pandemic, we created two scatterplots analyzing the relationship between GDP per capita and CO~2~ emissions per capita by year. From the graph, we see that in 2019 and 2020, there is a strong positive relationship present. In 2020, this relationship does appear to be slightly less steep, likley due to the small decrease in CO~2~ emissions during the pandemic. However, there does not appear to be any indiciation that the pandemic had an affect on the relationship between GDP per capita and CO~2~ emissions per capita.
+Again, we were interested in whether the COVID-19 pandemic affected this relationship. In order to see the affect of the pandemic, we created two scatterplots analyzing the relationship between GDP per capita and CO~2~ emissions per capita by year. From the graph, we see that in 2019 and 2020, there is a strong positive relationship present. In 2020, this relationship does appear to be slightly less steep, likely due to the small decrease in CO~2~ emissions during the pandemic. However, there does not appear to be any indiciation that the pandemic had an affect on the relationship between GDP per capita and CO~2~ emissions per capita.
 
 ```{r}
 #| label: Facted Scatterplot of GDP per Capita vs CO2 Emissions per Capita by Year
@@ -667,8 +664,7 @@ Again, we were interesting in if the COVID-19 pandemic affected this relationshi
 #| fig-alt: "Scatterplot that shows the relationship between GDP per capita vs CO2 emissions per capita, split by years 2019 and 2020. Both scatterplots show a positive linear relationships between the variables, with the relationship being almost identical between years."
 
 ggplot(
-  data = model_data %>%
-    filter(year %in% c(2019, 2020), parent_company == "Grand Total"),
+  data = model_data,
   mapping = aes(
     x = gdp_per_capita,
     y = co2_per_capita
