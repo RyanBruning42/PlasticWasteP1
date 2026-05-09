@@ -1,8 +1,8 @@
 ---
-title: "Project 1 Final Report"
+title: "Analysis of Break Free From Plastic Data with Supplemental Data"
 format:
   html:
-    theme: cosmo
+    theme: minty
     code-fold: true
     code-summary: "Show code"
     toc: true
@@ -42,12 +42,16 @@ This data set was independently gathered by an individual names Sarah Sauve, in 
 
 Through the use of the World Bank Group's API, we were able to collect population and GDP data for each country in our original Plastic Waste data set between the years 2019 and 2020. The World Bank Group does not necessarily collect the data themselves, but relies on outside resources like countries National Statistic Agencies, Central Banks, and Government Agencies. Although the World Bank does not collect the data themselves, they coordinate and compile the data into easily accessible APIs to be used. The data is collected through multiple sources like household surveys, digital records, censuses, and secondary sources previously discussed. This data is collected in order to have a record of important statistics on countries that is easily accessible and can be analyzed at any given moment.
 
-## CO2 Data:
+## CO~2~ Data:
 
-Our final data set contains information about CO2 Emissions throughout history that was published by *Our World in Data*. Although *Our World in Data* published the data, they rely on outside sources such as the Global Carbon Project and other scientific databases to collect the data. The data set contains country-level CO2 emissions spanning as early as 1750 to 2024. However, to match our original data set, we restricted the years to 2019 and 2020. In order to actually come up with the data, the original collectors had to get creative. To estimate the CO2 emission for one country in any given year they would gather information on how much energy sources a country extracted in that year, then add the amount of fuel that country imported, and finally subtract any fuel the country exported. What was left is an estimate of the net consumption of energy sources in that year. They can then break down the energy sources into smaller categories and multiply the quantity of one fuel source by the emission factor to figure out how much CO2 was emitted by that energy source. They would then do that for all energy sources and sum them up to find the total amount of CO2 emission by a country in a given year. This may seem like a lot of work, but this is very important data. CO2 emissions are detrimental to the health and safety of Earth and its future. We must be tracking and analyzing how our CO2 emissions change year by year in order to better understand how we can mitigate the effect it will have on our future.
+Our final data set contains information about CO~2~ Emissions throughout history that was published by *Our World in Data*. Although *Our World in Data* published the data, they rely on outside sources such as the Global Carbon Project and other scientific databases to collect the data. The data set contains country-level CO~2~ emissions spanning as early as 1750 to 2024. However, to match our original data set, we restricted the years to 2019 and 2020. In order to actually come up with the data, the original collectors had to get creative. To estimate the CO~2~ emission for one country in any given year they would gather information on how much energy sources a country extracted in that year, then add the amount of fuel that country imported, and finally subtract any fuel the country exported. What was left is an estimate of the net consumption of energy sources in that year. They can then break down the energy sources into smaller categories and multiply the quantity of one fuel source by the emission factor to figure out how much CO~2~ was emitted by that energy source. They would then do that for all energy sources and sum them up to find the total amount of CO~2~ emission by a country in a given year. This may seem like a lot of work, but this is very important data. CO~2~ emissions are detrimental to the health and safety of Earth and its future. We must be tracking and analyzing how our CO~2~ emissions change year by year in order to better understand how we can mitigate the effect it will have on our future.
 
+# Supplemental Data:
 
-## API Data
+## API Data:
+
+To better understand the difference of plastic waste in countries, we believed it would be important to factor in their population and GDP. Our justification for this was that with larger populations we are likely to see more plastic waste as there are more opportunities for people to litter and use plastics. Also, by having population data we are able to normalize our data and look at per capita measurements which will give us a better comparison between countries. We also believed that GDP would play an interesting role in our analysis. Typically, a higher GDP would mean that a country has more opportunities for consumption which could lead to more plastic waste. However, countries with higher GDP's are also more likely to have better waste managment systems that could reduce plastic waste.
+
 ```{r}
 #renaming countries in my dataset to have ISO-2 codes that our API uses
 plastics <- plastics %>% 
@@ -132,20 +136,15 @@ population_data <- map_dfr(iso2_list, function(x) {
 })
 ```
 
+## External CO~2~ data:
 
-For our first supplemental dataset, we cited the World Bank API to gather data on both GDP and population. We figured this data would be necessary if we wanted to find out how plastic waste relates to the size of a countries population and/or economy.
-
-
-# External CO2 data
+We believed that another vital variable that may be related to the amount of plastic waste in countries is there CO~2~ emissions. We believe that CO~2~ emissions are likely correlated with higher industrial activity and energy use, which can also be linked to plastic waste. Because of this, the addition of CO~2~ emissions on our analysis can give us a better understanding of the underlying reason for larger plastic waste in certain countries.
 
 ```{r}
 co2 <- readr::read_csv(
   "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv")
 ```
 
-For the second dataset we found it from a website called "Our World in Data" and it contains a lot of information on different types of emissions, but in order to keep it less messy we decided to focus exclusively on the CO2 emissions and wanted to see if there was a relationship between the two.
-
-We then put all of the data together into a single dataset.
 ```{r}
 #| label: Meta Data Creation
 
@@ -171,27 +170,25 @@ meta_set <- plastics %>%
   )
 ```
 
+# Research Questions:
 
+1.  What is the relationship between GDP per capita and plastic waste generation across countries in 2019-2020? Did the 2020 pandemic have the same effect on both?
 
+2.  What is the relationship between GDP per capita and CO₂ emissions per capita across countries in 2019, and how does population size influence this relationship?
 
-# Research Questions
+## Exploring the Link Between GDP per Capita and Plastic Waste:
 
-1. What is the relationship between GDP per capita and plastic waste generation across countries in 2019-2020? Did the 2020 pandemic have the same effect on both?
+GDP per capita provides a useful lens when examining the difference in plastic waste across countries. Initially it may seem that GDP is just used to measure the wealth of a country, but it also captures variations in income, consumption, and infrastructure, all factors that may influence both the amount of plastic waste generated and the steps that countries may take to reduce their waste. In this analysis, we investigate the relationship between GDP per capita and plastic waste generated across countries between 2019-2020.
 
-2. What is the relationship between GDP per capita and CO₂ emissions per capita across countries in 2019, and how does population size influence this relationship?
-
-
-
-
-## RQ 1 Data Summary (1 of 2):
-
-How much plastic waste was collected in each country from 2019-2020?
+To begin the analysis, we first looked into what plastic waste looked like per country. We started by finding the countries with the highest plastic waste in order to see if a pattern arrises. From the table we see that the countries with the highest plastic waste tend to belong to Africa or Southeast Asia. However, we do not believe that this is a regional pattern. We believe that these countries are likely going to be lower income countries that have less developed waste collection and management systems in place.
 
 ```{r}
+#| label: Total Plastic Waste by Country
+
 country_waste_summary <- function(plastics) {
   plastics |>
     mutate(country = str_to_lower(country)) |>
-    filter(parent_company == "Grand Total") |>
+    filter(parent_company == "Grand Total", country != "empty") |>
     group_by(country) |>
     summarise(
       total_waste = sum(grand_total, na.rm = TRUE),
@@ -214,7 +211,7 @@ country_waste |>
     decimals = 0
   ) |>
   tab_caption(
-    "Table: Waste by Country (2019-2020)"
+    "Table 1: Waste by Country (2019-2020)"
     ) |>
   tab_header(
     title = md("**Total Plastic Waste Collected by Country**"),
@@ -226,11 +223,11 @@ country_waste |>
   )
 ```
 
-## RQ 1 Data Summary (2 of 2):
-
-How much plastic waste was collected in each country per volunteer?
+To better understand how countries are addressing plastic waste, we also examine the distribution of volunteers involved in cleanup efforts. By normalizing total plastic waste by the number of volunteers, we create a measure of plastic waste per volunteer, which allows for more meaningful comparisons across countries of different sizes. This metric provides information on volunteer efforts and may highlight differences between the scale of the problem and the available human resources. The results suggest that some countries with lower total plastic waste still have high waste per volunteer. This gives us insight into how many of these countries may be struggling with reducing their waste due to their lower income or infrastructure.
 
 ```{r}
+#| label: Plastic Waste per Volunteer by Country 
+
 countries <- plastics |>
   filter(parent_company == "Grand Total",
          !is.na(country)) |>
@@ -272,7 +269,7 @@ waste_per_volunteer_country |>
     subtitle = "Computed using grand total across countries"
   ) |>
   tab_caption(
-    "Table: Waste per volunteer participation across countries, constructed using iteration."
+    "Table 2: Waste per volunteer participation across countries, constructed using iteration."
   ) |>
   tab_style(
     style = cell_text(weight = "bold"),
@@ -280,10 +277,14 @@ waste_per_volunteer_country |>
   )
 ```
 
-
+Now that we understand how plastic waste is distributed between countries and the impact of volunteers, we can look into the relationship between GDP per capita and plastic waste. Earlier, we discussed that GDP per capita may have a competing effect on plastic waste due to a larger GDP meaning more opportunity for consumption leading to large plastic waste, but also a larger GDP allows countries to allocate more funds towards reducing their waste. However, from the chart below we can see that there appears to actually be a negative linear relationship between GDP per capita and plastic waste. This means that as a countries GDP per capita increases, we would expect that country to produce less plastic waste.
 
 ```{r}
 #| label: Comparison of GDP per capita and plastic waste per capita (2019)
+#| warning: false
+#| fig-cap: "Scatterplot of GDP per Capita vs. Plastic Waste Per Capita in the year 2019"
+#| fig-alt: "Scatterplot analyzing the relationship between GDP per Capita and Plastic Waste per Capita in the year 2019. It shows a negative linear relationship between the variables. "
+
 graph1 <- meta_set %>%
   filter(year == 2019, parent_company == "Grand Total")
 
@@ -294,18 +295,24 @@ graph1 <- graph1 %>%
   )
 
 ggplot(graph1, aes(x = gdp_per_capita, y = plastic_waste_per_capita)) +
-  geom_point() +
+  geom_point(alpha = 0.6, color = "#2A9D8F") +
   geom_smooth(method = "lm", se = FALSE) +
   labs(
     title = "GDP per Capita vs Plastic Waste per Capita (2019)",
     x = "GDP per capita",
-    y = "Plastic items per capita"
+    y = "Plastic Waste per capita"
   ) +
   scale_x_log10() +
   scale_y_log10() +
-    theme_ft_rc()
+    theme_ft_rc() +
+  theme(
+    plot.title = element_text(size = 16)
+  )
 ```
 
+While visualizations can give us an initial sense of the relationship between GDP per capita and plastic waste per capita, they are not sufficient enough to evaluate its significance. To better understand this relationship we apply a linear regression model, which allows us to estimate the direction and strength of our relationship. The resulting line of best fit, $\hat{plastic waste}=-0.4761(GDP per capita) -0.2049(2020) - 2.7925$, provides us with an equation to estimate how plastic waste per capita changes with GDP per capita.
+
+This equation suggest that there is a negative linear relationship between GDP per capita and plastic waste per capita. From this, we are able to deduce that as our GDP per capita increases, we expect to see less plastic waste per capita. Furthermore, our GDP per capita is associated with a p-value of 0.0134, providing us with evidence that GDP per capita is a significant predictor of plastic waste per capita in countries.
 
 ```{r}
 #| label: Statistical Model
@@ -314,11 +321,12 @@ model_data <- meta_set %>%
   filter(year %in% c(2019, 2020), parent_company == "Grand Total") %>%
   mutate(
     gdp_per_capita = gdp_billions * 1e9 / population,
-    plastic_waste_per_capita = grand_total / population
+    plastic_waste_per_capita = grand_total / population,
+    year = factor(year)
   )
 
-lm(
-  log10(plastic_waste_per_capita) ~ log10(gdp_per_capita) + factor(year),
+model <- lm(
+  log10(plastic_waste_per_capita) ~ log10(gdp_per_capita),
   data = model_data
 )
 
@@ -330,7 +338,7 @@ model_table <- summary(model)$coefficients %>%
       term,
       `(Intercept)` = "Intercept",
       `log10(gdp_per_capita)` = "GDP Per Capita",
-      `factor(year)2020` = "Year 2020"
+      `year2020` = "Year 2020"
     )
   )
 
@@ -356,17 +364,62 @@ model_table %>%
     subtitle = md("Log-log linear model using 2019 and 2020 country-level data")
   ) %>%
   tab_caption(
-    md("Table 1: Linear regression examining how GDP per capita and year relate to plastic waste per capita.")
+    md("Table 3: Linear regression examining how GDP per capita and year relate to plastic waste per capita.")
   )
 ```
 
-The regression shows a positive relationship between GDP per capita and plastic waste per capita. This is suggested by the negative coefficient and implies that an increase in GDP means an decrease in plastic waste per capita. With a p-value of 0.02 on the slope we have sufficient evidence to conclude that there is a relationship between the two variables.
-
-
-
+One of the key things to keep in mind with this analysis is the time that the data was collected. Our data is from 2019-2020 with 2020 being the start of the COVID-19 pandemic. Because of that, we thought we should look at the difference in the relationship between GDP per capita and plastic waste betweent those years. Using the bubble plot, we can see that in 2019 there was a steeper negative relationship than there was in 2020. We also generally see smaller values of plastic waste per capita in 2020, which is likely due to less consumption, less generation, and less people leaving their homes.
 
 ```{r}
-#| label: Affect of COVID on Plastic Waste vs CO2 Emissions
+#| label: Bubbleplot of GDP per Capita and Plastic Waste by Population Size Facted by Year
+#| warning: false
+#| fig-cap: "Relationship between GDP per capita and plastic waste per capita across countries in 2019 and 2020, with separate panels for each year."
+#| fig-alt: "Faceted scatterplot showing GDP per capita versus plastic waste per capita for countries in 2019 and 2020. Each panel includes a fitted trend line. The relationship appears positive in both years, allowing comparison of how the pattern changes between 2019 and 2020."
+
+graph2 <- meta_set %>%
+  filter(parent_company == "Grand Total") %>%
+  mutate(
+    year = factor(year),
+    gdp_per_capita = gdp_billions * 1e9 / population,
+    plastic_waste_per_capita = grand_total / population
+  ) %>%
+  filter(
+    gdp_per_capita > 0,
+    plastic_waste_per_capita > 0
+  )
+
+ggplot(
+  graph2,
+  aes(
+    x = gdp_per_capita,
+    y = plastic_waste_per_capita,
+    size = population
+  )
+) +
+  geom_point(alpha = 0.6, color = "#2A9D8F") +
+  facet_wrap(.~year) +
+  geom_smooth(aes(group = year), method = "lm", se = FALSE, show.legend = FALSE) +
+  scale_size(range = c(1.5, 10), name = "Population") +
+  scale_x_log10(labels = scales::label_dollar()) +
+  scale_y_log10(labels = scales::label_scientific()) +
+  theme_ft_rc() +
+  guides(size = guide_legend(override.aes = list(shape = 16))) +
+  labs(
+    x = "GDP per Capita (USD)",
+    y = "Plastic Waste per Capita",
+    title = "GDP per Capita and Plastic Waste per Capita Across Countries",
+    subtitle = "Comparison of 2019 and 2020"
+  ) +
+  theme(
+    plot.title = element_text(size = 13),
+    plot.subtitle = element_text(size = 11)
+  )
+```
+
+To truly understanding the impact of the pandemic, we look at the percent change in plastic waste from 2019 to 2020. If plastic waste per capita did decrease between the two years, we would expect to see a negative percent change. From the data, we find a percent change of -61.29%, indicating a singificant decrease in plastic waste per capita over the two year span. This result supports our earlier observation that plastic waste per capita in 2020 was lower than in 2019. Therefore, our analysis suggests that during the pandemic there was a significant reduction in plastic waste per capita.
+
+```{r}
+#| label: Affect of COVID on Plastic Waste
 
 meta_set <- meta_set %>%
   mutate(
@@ -375,15 +428,6 @@ meta_set <- meta_set %>%
       "Grand Total",
       parent_company
     )
-  )
-
-
-co2_change <- co2 %>%
-  filter(year %in% c(2019, 2020),
-         country == "World") %>%
-  summarise(
-    pct_change = (co2_per_capita[year == 2020] - co2_per_capita[year == 2019]) /
-                 co2_per_capita[year == 2019] * 100
   )
 
 plastic_data <- meta_set %>%
@@ -402,20 +446,40 @@ plastic_change <- plastic_data %>%
   )
 
 summary_table<- tibble(
-  waste_metric = c("CO2 per capita", "Plastic per capita"),
-  percentage_change = c(co2_change$pct_change,
-                 plastic_change$pct_change)
+  waste_metric = "Plastic per capita",
+  percentage_change = plastic_change$pct_change
 )
-summary_table
+
+summary_table %>% 
+  gt() %>% 
+  tab_header(
+    title = md("**Change in Plastic Waste (2019-2020)**"),
+    subtitle = md("Percent change in per capita value")
+  ) %>% 
+  fmt_number(
+    columns = percentage_change,
+    decimals = 2
+  ) %>% 
+  cols_label(
+    waste_metric = "Plastic Waste",
+    percentage_change = "Percent Change (%)"
+  ) %>% 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>% 
+  tab_caption(
+    md("Table 4: Examining the percent change in plastic waste from 2019 to 2020")
+  )
 ```
 
-Covid seemed to have helped Co2 per capita and plastic per capita, as they have decreased by 6% in Co2 and a whole 61% in plastic per capita. This means that by 2019 to 2020 there was a significant decrease of Co2 and plastic waste. This is most likely due to the pandemic and people being isolated at home. 
+## Exploring the Link Between GDP per Capita and CO₂ Emissions per Capita: 
 
-## RQ 2 Data Summary (1 of 2):
-
-Is there a visible trend between countries per capita numbers and population?
+With the introduction of GDP and CO~2~ emissions into our data set, we thought it would be interesting to explore the relationship between those variables. We assumed that for countries with higher GDP values, there are going to be more CO~2~ emissions due to the larger consumption and infrastructure. In order to see if this is impacted by population, we created a table comparing the per capita values with the countries population.
 
 ```{r}
+#| label: CDP per Capita vs CO2 Emission per Capita in 2019
+
 country_gdp_co2_summary <- function(data) {
   
   data |>
@@ -454,7 +518,7 @@ gdp_co2_table |>
     subtitle = "Top 10 countries sorted by population"
   ) |>
   tab_caption(
-    "Countries GDP per capita & CO2 per capita, sorted by population"
+    "Table 5: Countries GDP per capita & CO2 per capita, sorted by population"
   ) |>
   fmt_currency(
   columns = contains("gdp"),
@@ -463,11 +527,11 @@ gdp_co2_table |>
 )
 ```
 
-## RQ 2 Data Summary (2 of 2):
-
-Does there appear to be a relationship between the rank of a countries GDP per capita and their CO2 per capita?
+To further analyze this relationship, we thought it would be a good idea to look at the per capita values compared to the countries global ranking in GDP and CO~2~ emissions. We arranged our table in descending order of GDP global ranking to see how their CO~2~ global ranking compares. It does appear that there is a relationship between the two variables as the GDP global ranking is usually relatively close to the CO~2~ global ranking. This further supports our claim from earlier predicting that countries with a higher GDP would have higher CO~2~ emissions.
 
 ```{r}
+#| label: Comparing GDP per Capita and CO2 Emissions per Capita with Countries Global Ranking
+
 countries <- meta_set |>
   filter(
     year == 2019,
@@ -537,7 +601,7 @@ ranked_table |>
     subtitle = "Top 10 countries ranked by GDP per capita in 2019"
   ) |>
   tab_caption(
-    "Table 6. Comparison of country rankings for GDP per capita and CO2 emissions per capita in 2019."
+    "Table 6: Comparison of country rankings for GDP per capita and CO2 emissions per capita in 2019."
   ) |>
   tab_style(
     style = cell_text(weight = "bold"),
@@ -545,7 +609,8 @@ ranked_table |>
   )
   
 ```
-Co2 and GDP rank seem to work together, as the ranks of these countries with the highest GDP seem to also have very high GDP rankings. This makes sense as we saw in our lm model as there was a positive relationship between the two varaibles.
+
+By just using tables, we are losing a lot of information that a visualization can provide. In order to compensate for that, we created a bubble plot of the relationship between GDP per capita and CO~2~ emissions per capita, with the size of the bubble correlating to the population size. From this graph there is a clear positive relationship between the variables. We see that as GDP per capita increases, so does CO~2~ emissions per capita. It also appears that countries with larger populations (signified by larger bubbles), also tend to have larger CO~2~ emissions than countries with smaller populations.
 
 ```{r}
 #| warning: false
@@ -586,20 +651,28 @@ model_data %>%
     y = "CO2 Emissions Per Capita",
     title = "Bubble Plot of GDP and CO2 Emissions Per Capita",
     subtitle = "Countries in 2019, with bubble size representing population"
+  ) +
+  theme(
+    plot.title = element_text(size = 16),
+    plot.subtitle = element_text(size = 12)
   )
 ```
-*Alt text:* Bubble plot of GDP per capita versus CO2 emissions per capita for 51 countries in 2019. Bubble size represents population and color indicates GDP level. Countries with higher GDP per capita tend to also have higher CO2 emissions per capita.
+
+Again, we were interesting in if the COVID-19 pandemic affected this relationship. In order to see the affect of the pandemic, we created two scatterplots analyzing the relationship between GDP per capita and CO~2~ emissions per capita by year. From the graph, we see that in 2019 and 2020, there is a strong positive relationship present. In 2020, this relationship does appear to be slightly less steep, likley due to the small decrease in CO~2~ emissions during the pandemic. However, there does not appear to be any indiciation that the pandemic had an affect on the relationship between GDP per capita and CO~2~ emissions per capita.
 
 ```{r}
+#| label: Facted Scatterplot of GDP per Capita vs CO2 Emissions per Capita by Year
 #| warning: false
-#| label: fig-rq1-facet
-#| fig-cap: "Relationship between GDP per capita and plastic waste per capita across countries in 2019 and 2020, with separate panels for each year."
-#| fig-alt: "Faceted scatterplot showing GDP per capita versus plastic waste per capita for countries in 2019 and 2020. Each panel includes a fitted trend line. The relationship appears positive in both years, allowing comparison of how the pattern changes between 2019 and 2020."
+#| fig-cap: "Scatterplot analyzing the relationship between GDP per capita vs CO2 emissions per capita across the years 2019-2020"
+#| fig-alt: "Scatterplot that shows the relationship between GDP per capita vs CO2 emissions per capita, split by years 2019 and 2020. Both scatterplots show a positive linear relationships between the variables, with the relationship being almost identical between years."
 
 ggplot(
-  meta_set %>%
+  data = model_data %>%
     filter(year %in% c(2019, 2020), parent_company == "Grand Total"),
-  aes(x = gdp_per_capita, y = plastic_waste_per_capita)
+  mapping = aes(
+    x = gdp_per_capita,
+    y = co2_per_capita
+  )
 ) +
   geom_point(color = "#2C7FB8", alpha = 0.7, size = 2.5) +
   geom_smooth(method = "lm", se = FALSE, color = "#D95F0E", linewidth = 1) +
@@ -607,11 +680,10 @@ ggplot(
   scale_y_log10(labels = scales::label_number()) +
   facet_wrap(~year) +
   labs(
-    title = "GDP per Capita vs Plastic Waste per Capita",
+    title = "GDP per Capita vs CO2 Emissions per Capita",
     subtitle = "Comparison of country-level relationships in 2019 and 2020",
     x = "GDP per Capita",
-    y = "Plastic Waste per Capita"
+    y = "CO2 Emissions per Capita"
   ) +
   theme_ft_rc()
 ```
-*Alt text:* Faceted scatterplot showing GDP per capita versus plastic waste per capita for countries in 2019 and 2020. Each panel includes a fitted trend line. The relationship appears positive in both years, allowing comparison of how the pattern changes between 2019 and 2020.
