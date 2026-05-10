@@ -26,6 +26,7 @@ library(gt)
 library(hrbrthemes)
 library(viridis)
 library(hexbin)
+library(patchwork)
 ```
 
 ```{r}
@@ -175,6 +176,23 @@ meta_set <- plastics %>%
     gdp_per_capita = gdp_billions * 1e9 / population,
     plastic_waste_per_capita = grand_total / population
   )
+
+meta_set_2019 <- meta_set %>% 
+  filter(year == 2019)
+
+meta_set_2020 <- meta_set %>% 
+  filter(year == 2020) %>%
+  group_by(country.x) %>%   
+  summarise(
+    grand_total = sum(grand_total, na.rm = TRUE),
+    population = first(population),
+    gdp_billions = first(gdp_billions),
+    .groups = "drop"
+  ) %>%
+  mutate(parent_company = "Grand Total",
+         year = 2020)
+  
+  
 ```
 
 # Research Questions:
@@ -292,8 +310,16 @@ Now that we understand how plastic waste is distributed between countries and th
 #| fig-cap: "Scatterplot of GDP per Capita vs. Plastic Waste Per Capita in the year 2019"
 #| fig-alt: "Scatterplot analyzing the relationship between GDP per Capita and Plastic Waste per Capita in the year 2019. It shows a negative linear relationship between the variables."
 
+<<<<<<< HEAD
 graph1 <- meta_set %>%
   filter(year == 2019, parent_company == "Grand Total") %>%
+=======
+
+graph1 <- meta_set_2019 %>%
+  filter(parent_company == "Grand Total")
+
+graph1 <- graph1 %>%
+>>>>>>> fca8987 (I finally fixed this stupid issue)
   mutate(
     gdp_per_capita = gdp_billions * 1e9 / population,
     plastic_waste_per_capita = grand_total / population
@@ -315,9 +341,9 @@ ggplot(graph1, aes(x = gdp_per_capita, y = plastic_waste_per_capita)) +
   )
 ```
 
-While visualizations can give us an initial sense of the relationship between GDP per capita and plastic waste per capita, they are not sufficient enough to evaluate its significance. To better understand this relationship we apply a linear regression model, which allows us to estimate the direction and strength of our relationship. The resulting line of best fit, $\hat{plastic waste}=-0.4761(GDP per capita) -0.2049(2020) - 2.7925$, provides us with an equation to estimate how plastic waste per capita changes with GDP per capita.
+While visualizations can give us an initial sense of the relationship between GDP per capita and plastic waste per capita, they are not sufficient enough to evaluate its significance. To better understand this relationship we apply a linear regression model, which allows us to estimate the direction and strength of our relationship. The resulting line of best fit, $\hat{plastic waste}=-0.6864(GDP per capita) - 1.9542$, provides us with an equation to estimate how plastic waste per capita changes with GDP per capita.
 
-This equation suggest that there is a negative linear relationship between GDP per capita and plastic waste per capita. From this, we are able to deduce that as our GDP per capita increases, we expect to see less plastic waste per capita. Furthermore, our GDP per capita is associated with a p-value of 0.0134, providing us with evidence that GDP per capita is a significant predictor of plastic waste per capita in countries.
+This equation suggest that there is a negative linear relationship between GDP per capita and plastic waste per capita. From this, we are able to deduce that as our GDP per capita increases, we expect to see less plastic waste per capita. Furthermore, our GDP per capita is associated with a p-value of 0.0271, providing us with evidence that GDP per capita is a significant predictor of plastic waste per capita in countries.
 
 ```{r}
 #| label: Statistical Model
@@ -381,19 +407,30 @@ One of the key things to keep in mind with this analysis is the time that the da
 #| fig-cap: "Relationship between GDP per capita and plastic waste per capita across countries in 2019 and 2020, with separate panels for each year."
 #| fig-alt: "Faceted scatterplot showing GDP per capita versus plastic waste per capita for countries in 2019 and 2020. Each panel includes a fitted trend line. The relationship appears positive in both years, allowing comparison of how the pattern changes between 2019 and 2020."
 
-graph2 <- meta_set %>%
+graph2 <- meta_set_2019 %>%
   filter(parent_company == "Grand Total") %>%
   mutate(
-    year = factor(year),
     gdp_per_capita = gdp_billions * 1e9 / population,
     plastic_waste_per_capita = grand_total / population
   ) %>%
   filter(
     gdp_per_capita > 0,
-    plastic_waste_per_capita > 0
-  )
+    plastic_waste_per_capita > 0,
+  ) %>%
+  mutate(year = factor(year))     
 
-ggplot(
+graph3 <- meta_set_2020 %>%
+  mutate(
+    gdp_per_capita = gdp_billions * 1e9 / population,
+    plastic_waste_per_capita = grand_total / population
+  ) %>%
+  filter(
+    gdp_per_capita > 0,
+    plastic_waste_per_capita > 0,
+  ) %>%
+  mutate(year = factor(year)) 
+
+p1 <- ggplot(
   graph2,
   aes(
     x = gdp_per_capita,
@@ -402,13 +439,13 @@ ggplot(
   )
 ) +
   geom_point(alpha = 0.6, color = "#2A9D8F") +
-  facet_wrap(.~year) +
-  geom_smooth(aes(group = year), method = "lm", se = FALSE, show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) +
   scale_size(range = c(1.5, 10), name = "Population") +
   scale_x_log10(labels = scales::label_dollar()) +
   scale_y_log10(labels = scales::label_scientific()) +
-  theme_ft_rc() +
+  theme_minimal() +
   guides(size = guide_legend(override.aes = list(shape = 16))) +
+  theme_ft_rc() +
   labs(
     x = "GDP per Capita (USD)",
     y = "Plastic Waste per Capita",
@@ -418,6 +455,62 @@ ggplot(
   theme(
     plot.title = element_text(size = 13),
     plot.subtitle = element_text(size = 11)
+  )
+
+p2 <- ggplot(
+  graph3,
+  aes(
+    x = gdp_per_capita,
+    y = plastic_waste_per_capita,
+    size = population
+  )
+) +
+  geom_point(alpha = 0.6, color = "#2A9D8F") +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) +
+  scale_size(range = c(1.5, 10), name = "Population") +
+  scale_x_log10(labels = scales::label_dollar()) +
+  scale_y_log10(labels = scales::label_scientific()) +
+  theme_minimal() +
+  guides(size = guide_legend(override.aes = list(shape = 16))) +
+  theme_ft_rc() +
+  labs(
+    x = "GDP per Capita (USD)",
+    y = "Plastic Waste per Capita"
+  ) +
+  theme(
+    plot.title = element_text(size = 13),
+    plot.subtitle = element_text(size = 11)
+  )
+
+
+
+base_theme <- theme_ft_rc() +
+  theme(
+    plot.title = element_blank(),
+    plot.subtitle = element_blank(),
+    legend.position = "right",
+    axis.text.x = element_text(angle = 30, hjust = 1),
+    panel.grid.minor = element_blank()
+  )
+
+p1_clean <- p1 +
+  labs(title = "2019", subtitle = NULL) +
+  base_theme
+
+p2_clean <- p2 +
+  labs(title = "2020", subtitle = NULL) +
+  base_theme
+
+p1_clean + p2_clean +
+  plot_layout(ncol = 2, guides = "collect") +
+  plot_annotation(
+    title = "GDP per Capita and Plastic Waste per Capita Across Countries",
+    subtitle = "Comparison of 2019 and 2020"
+  ) &
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 11),
+    legend.position = "right"
   )
 ```
 
@@ -469,7 +562,7 @@ summary_table %>%
   )
 ```
 
-## Exploring the Link Between GDP per Capita and CO₂ Emissions per Capita: 
+## Exploring the Link Between GDP per Capita and CO₂ Emissions per Capita:
 
 With the introduction of GDP and CO~2~ emissions into our data set, we thought it would be interesting to explore the relationship between those variables. We assumed that for countries with higher GDP values, there are going to be more CO~2~ emissions due to the larger consumption and infrastructure. In order to see if this is impacted by population, we created a table comparing the per capita values with the countries population.
 
@@ -663,8 +756,25 @@ Again, we were interested in whether the COVID-19 pandemic affected this relatio
 #| fig-cap: "Scatterplot analyzing the relationship between GDP per capita vs CO2 emissions per capita across the years 2019-2020"
 #| fig-alt: "Scatterplot that shows the relationship between GDP per capita vs CO2 emissions per capita, split by years 2019 and 2020. Both scatterplots show a positive linear relationships between the variables, with the relationship being almost identical between years."
 
+graph3 <- meta_set %>%
+  filter(parent_company == "Grand Total") %>%
+  mutate(
+    year = factor(year),
+    gdp_per_capita = gdp_billions * 1e9 / population,
+    plastic_waste_per_capita = grand_total / population
+  ) %>%
+  filter(
+    gdp_per_capita > 0,
+    co2_per_capita > 0
+  )
+
 ggplot(
+<<<<<<< HEAD
   data = model_data,
+=======
+  data = graph3 %>%
+    filter(year %in% c(2019, 2020), parent_company == "Grand Total"),
+>>>>>>> fca8987 (I finally fixed this stupid issue)
   mapping = aes(
     x = gdp_per_capita,
     y = co2_per_capita
