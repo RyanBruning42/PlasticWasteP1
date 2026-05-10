@@ -310,16 +310,11 @@ Now that we understand how plastic waste is distributed between countries and th
 #| fig-cap: "Scatterplot of GDP per Capita vs. Plastic Waste Per Capita in the year 2019"
 #| fig-alt: "Scatterplot analyzing the relationship between GDP per Capita and Plastic Waste per Capita in the year 2019. It shows a negative linear relationship between the variables."
 
-<<<<<<< HEAD
-graph1 <- meta_set %>%
-  filter(year == 2019, parent_company == "Grand Total") %>%
-=======
 
 graph1 <- meta_set_2019 %>%
   filter(parent_company == "Grand Total")
 
 graph1 <- graph1 %>%
->>>>>>> fca8987 (I finally fixed this stupid issue)
   mutate(
     gdp_per_capita = gdp_billions * 1e9 / population,
     plastic_waste_per_capita = grand_total / population
@@ -703,9 +698,9 @@ By just using tables, we are losing a lot of information that a visualization ca
 
 ```{r}
 #| warning: false
-#| label: fig-rq2-bubble
+#| label: Bubbleplot Showing Relationship Between GDP per Capita and CO2 Emissions per Capita
 #| fig-cap: "GDP per capita and CO2 emissions per capita across countries in 2019 and 2020, with bubble size representing population."
-#| fig-alt: "Faceted bubble plot of GDP per capita versus CO2 emissions per capita for countries in 2019 and 2020. Bubble size represents population and color indicates GDP level. Countries with higher GDP per capita tend to also have higher CO2 emissions per capita."
+#| fig-alt: "Bubble plot of GDP per capita versus CO2 emissions per capita for countries in 2019 and 2020. Bubble size represents population and color indicates GDP level. Countries with higher GDP per capita tend to also have higher CO2 emissions per capita."
 
 model_data %>%
   arrange(desc(population)) %>% 
@@ -730,7 +725,6 @@ model_data %>%
     color = gdp_level
   )) +
   geom_point(alpha = 0.65) +
-  facet_wrap(~year) +
   scale_size(range = c(2, 14), name = "Population") +
   scale_color_viridis_d(option = "A", end = 0.9, name = "GDP Level") +
   scale_x_log10(labels = scales::label_dollar()) +
@@ -740,7 +734,7 @@ model_data %>%
     x = "GDP Per Capita",
     y = "CO2 Emissions Per Capita",
     title = "Bubble Plot of GDP and CO2 Emissions Per Capita",
-    subtitle = "Comparison of 2019 and 2020, with bubble size representing population"
+    subtitle = "Bubble size representing population"
   ) +
   theme(
     plot.title = element_text(size = 16),
@@ -769,12 +763,8 @@ graph3 <- meta_set %>%
   )
 
 ggplot(
-<<<<<<< HEAD
-  data = model_data,
-=======
   data = graph3 %>%
     filter(year %in% c(2019, 2020), parent_company == "Grand Total"),
->>>>>>> fca8987 (I finally fixed this stupid issue)
   mapping = aes(
     x = gdp_per_capita,
     y = co2_per_capita
